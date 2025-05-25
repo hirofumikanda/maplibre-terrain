@@ -84,7 +84,7 @@ const MapComponent = () => {
 
     map.current = new maplibregl.Map({
       container: mapContainer.current,
-      style: "/styles/style.json",
+      style: "./styles/style.json",
       center: [139.7671, 35.6812],
       zoom: 12,
       hash: true,
