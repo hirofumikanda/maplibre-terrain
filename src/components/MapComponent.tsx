@@ -1,97 +1,50 @@
-import { useEffect, useRef } from "react";
-import maplibregl, {
-  Map,
-  type RequestParameters,
-  type GetResourceResponse,
-} from "maplibre-gl";
+import { useEffect, useRef, useState } from "react";
+import maplibregl, { Map } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
-
-const gsidem2terrainrgb = (r: number, g: number, b: number): number[] => {
-  let height = r * 655.36 + g * 2.56 + b * 0.01;
-  if (r === 128 && g === 0 && b === 0) {
-    height = 0;
-  } else if (r >= 128) {
-    height -= 167772.16;
-  }
-  height += 100000;
-  height *= 10;
-  const tB = (height / 256 - Math.floor(height / 256)) * 256;
-  const tG =
-    (Math.floor(height / 256) / 256 -
-      Math.floor(Math.floor(height / 256) / 256)) *
-    256;
-  const tR =
-    (Math.floor(Math.floor(height / 256) / 256) / 256 -
-      Math.floor(Math.floor(Math.floor(height / 256) / 256) / 256)) *
-    256;
-  return [tR, tG, tB];
-};
-
-maplibregl.addProtocol(
-  "gsidem",
-  async (
-    params: RequestParameters
-  ): Promise<GetResourceResponse<ArrayBuffer>> => {
-    const url = params.url.replace("gsidem://", "");
-
-    const image = await new Promise<HTMLImageElement>((resolve, reject) => {
-      const img = new Image();
-      img.crossOrigin = "";
-      img.onload = () => resolve(img);
-      img.onerror = reject;
-      img.src = url;
-    });
-
-    const canvas = document.createElement("canvas");
-    canvas.width = image.width;
-    canvas.height = image.height;
-    const context = canvas.getContext("2d");
-    if (!context) throw new Error("Canvas context not available");
-    context.drawImage(image, 0, 0);
-
-    const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-    for (let i = 0; i < imageData.data.length / 4; i++) {
-      const tRGB = gsidem2terrainrgb(
-        imageData.data[i * 4],
-        imageData.data[i * 4 + 1],
-        imageData.data[i * 4 + 2]
-      );
-      imageData.data[i * 4] = tRGB[0];
-      imageData.data[i * 4 + 1] = tRGB[1];
-      imageData.data[i * 4 + 2] = tRGB[2];
-    }
-    context.putImageData(imageData, 0, 0);
-
-    const blob: Blob = await new Promise((resolve) =>
-      canvas.toBlob((b) => resolve(b!), "image/png")
-    );
-    const arr = await blob.arrayBuffer();
-
-    return {
-      data: arr,
-      cacheControl: "public, max-age=3600",
-      expires: new Date(Date.now() + 1000 * 60 * 60),
-    };
-  }
-);
+import { useGsidemProtocol } from "../hooks/useGsidemProtocol";
+import ExaggerationSlider from "./ExaggerationSlider";
 
 const MapComponent = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<Map | null>(null);
+  const mapRef = useRef<Map | null>(null);
+  const [exaggeration, setExaggeration] = useState(1.5);
+
+  useGsidemProtocol();
 
   useEffect(() => {
-    if (map.current || !mapContainer.current) return;
+    if (mapRef.current || !mapContainer.current) return;
 
-    map.current = new maplibregl.Map({
+    const map = new maplibregl.Map({
       container: mapContainer.current,
       style: "./styles/style.json",
       center: [139.7671, 35.6812],
       zoom: 12,
       hash: true,
     });
+    mapRef.current = map;
   }, []);
 
-  return <div ref={mapContainer} style={{ width: "100%", height: "100vh" }} />;
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !map.getStyle()) return;
+
+    map.setTerrain({ source: "gsi-dem", exaggeration });
+
+    const layerId = "hillshade-gsi-dem";
+    if (
+      map.getLayer(layerId) &&
+      map.getPaintProperty(layerId, "hillshade-exaggeration") !== undefined
+    ) {
+      map.setPaintProperty(layerId, "hillshade-exaggeration", exaggeration / 3);
+    }
+  }, [exaggeration]);
+
+  return (
+    <div style={{ position: "relative", width: "100%", height: "100vh" }}>
+      <div ref={mapContainer} style={{ width: "100%", height: "100%" }} />
+      <ExaggerationSlider value={exaggeration} onChange={setExaggeration} />
+    </div>
+  );
 };
 
 export default MapComponent;

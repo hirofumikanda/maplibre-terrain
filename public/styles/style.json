@@ -37,9 +37,26 @@
       "maxzoom": 19
     },
     {
-      "id": "hills",
+      "id": "hillshade-gsi-dem",
       "type": "hillshade",
-      "source": "gsi-dem"
+      "source": "gsi-dem",
+      "layout": {
+        "visibility": "visible"
+      },
+      "paint": {
+        "hillshade-exaggeration": 0.5
+      }
+    },
+    {
+      "id": "hillshade-aws-terrain",
+      "type": "hillshade",
+      "source": "aws-terrain",
+      "layout": {
+        "visibility": "none"
+      },
+      "paint": {
+        "hillshade-exaggeration": 0.5
+      }
     }
   ],
   "terrain": {
