@@ -7,7 +7,7 @@ import ExaggerationSlider from "./ExaggerationSlider";
 const MapComponent = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapRef = useRef<Map | null>(null);
-  const [exaggeration, setExaggeration] = useState(1.5);
+  const [exaggeration, setExaggeration] = useState(0.5);
 
   useGsidemProtocol();
 
