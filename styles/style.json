@@ -6,6 +6,7 @@
       "type": "raster",
       "tiles": ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
       "tileSize": 256,
+      "maxzoom": 19,
       "attribution": "© OpenStreetMap contributors"
     },
     "gsi-dem": {
@@ -37,9 +38,9 @@
       "maxzoom": 19
     },
     {
-      "id": "hillshade-gsi-dem",
+      "id": "hillshade-aws-terrain",
       "type": "hillshade",
-      "source": "gsi-dem",
+      "source": "aws-terrain",
       "layout": {
         "visibility": "visible"
       },
@@ -48,19 +49,35 @@
       }
     },
     {
-      "id": "hillshade-aws-terrain",
-      "type": "hillshade",
+      "id": "color-relief-aws-terrain",
+      "type": "color-relief",
       "source": "aws-terrain",
-      "layout": {
-        "visibility": "none"
-      },
       "paint": {
-        "hillshade-exaggeration": 0.5
+        "color-relief-color": [
+          "interpolate",
+          ["linear"],
+          ["elevation"],
+          0,
+          "#c0e0ffff",
+          0.1,
+          "#d8d8d8ff",
+          3,
+          "#548359ff",
+          255,
+          "#32482dff",
+          1000,
+          "#32482dff",
+          1200,
+          "#adb7a3ff",
+          1700,
+          "#bfbfb8ff",
+          1750,
+          "#e6f4fdff",
+          3000,
+          "#ffffffff"
+        ],
+        "color-relief-opacity": 0.8
       }
     }
-  ],
-  "terrain": {
-    "source": "gsi-dem",
-    "exaggeration": 1.5
-  }
+  ]
 }
