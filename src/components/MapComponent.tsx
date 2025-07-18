@@ -28,9 +28,9 @@ const MapComponent = () => {
     const map = mapRef.current;
     if (!map || !map.getStyle()) return;
 
-    map.setTerrain({ source: "gsi-dem", exaggeration });
+    map.setTerrain({ source: "aws-terrain", exaggeration });
 
-    const layerId = "hillshade-gsi-dem";
+    const layerId = "hillshade-aws-terrain";
     if (
       map.getLayer(layerId) &&
       map.getPaintProperty(layerId, "hillshade-exaggeration") !== undefined
