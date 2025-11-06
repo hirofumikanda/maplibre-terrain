@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import maplibregl, { Map } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { useGsidemProtocol } from "../hooks/useGsidemProtocol";
+import { usePmtilesProtocol } from "../hooks/usePmtilesProtocol";
 import ExaggerationSlider from "./ExaggerationSlider";
 
 const MapComponent = () => {
@@ -10,6 +11,7 @@ const MapComponent = () => {
   const [exaggeration, setExaggeration] = useState(0.5);
 
   useGsidemProtocol();
+  usePmtilesProtocol();
 
   useEffect(() => {
     if (mapRef.current || !mapContainer.current) return;
@@ -28,9 +30,9 @@ const MapComponent = () => {
     const map = mapRef.current;
     if (!map || !map.getStyle()) return;
 
-    map.setTerrain({ source: "aws-terrain", exaggeration });
+    map.setTerrain({ source: "local-terrain", exaggeration });
 
-    const layerId = "hillshade-aws-terrain";
+    const layerId = "hillshade-local-terrain";
     if (
       map.getLayer(layerId) &&
       map.getPaintProperty(layerId, "hillshade-exaggeration") !== undefined
